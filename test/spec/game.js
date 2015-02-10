@@ -143,8 +143,8 @@ describe('GAME.Game', function() {
 
     function touchAt(game, y, x) {
         game.touchDown({
-            x: (game.cellSize * x + game.cellSize / 2),
-            y: (game.cellSize * y + game.cellSize / 2)
+            x: (GAME.cellSize * x + GAME.cellSize / 2),
+            y: (GAME.cellSize * y + GAME.cellSize / 2)
         });
         game.touchUp();
     };
@@ -234,7 +234,7 @@ describe('GAME.Game', function() {
 
     });
 
-    iit('trySwap', function(done) {
+    it('trySwap with invalid one', function(done) {
 
         var game = new GAME.Game();
 
@@ -264,10 +264,67 @@ describe('GAME.Game', function() {
 
         };
 
-        game.trySwap(game.field[1][1], game.field[1][2]);
+        var cell1 = game.grid[1][1];
+        var cell2 = game.grid[1][2];
+        game.trySwap(cell1, cell2);
 
+        // it should not change anything
+        assert.equal(cell1.gridX, 1);
+        assert.equal(cell1.gridY, 1);
+        assert.equal(cell1.kind, 3);
+        assert.equal(cell2.gridX, 2);
+        assert.equal(cell2.gridY, 1);
+        assert.equal(cell2.kind, 2);
 
         done();
     });
 
+    it('trySwap with valid one', function(done) {
+
+        var game = new GAME.Game();
+
+        //   0  1  2  3  4  5  6  7  8
+        var kinds = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 0
+            [1, 3, 2, 3, 3, 1, 1, 1, 1], // 1
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 2
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 3
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 4
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 5
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 6
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 7
+            [1, 1, 1, 1, 1, 1, 1, 1, 1], // 8
+        ];
+
+        game.init(kinds);
+
+        game.getChains = function() {
+            return {
+                cells: [game.grid[1][2], game.grid[1][3], game.grid[1][4]],
+                rows: 1
+            };
+        };
+
+        game.clearRows = function() {
+
+        };
+
+        var cell1 = game.grid[1][1];
+        var cell2 = game.grid[1][2];
+        game.trySwap(cell1, cell2, function() {
+
+            // the cells should swap
+            assert.equal(cell2.gridX, 1);
+            assert.equal(cell2.gridY, 1);
+            assert.equal(cell2.kind, 2);
+
+            assert.equal(cell1.gridX, 2);
+            assert.equal(cell1.gridY, 1);
+            assert.equal(cell1.kind, 3);
+
+            done();
+        });
+
+
+    });
 });

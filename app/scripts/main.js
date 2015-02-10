@@ -40,23 +40,14 @@ GAME.Game = function() {
 
     this.stage = new PIXI.Stage(0xFFFFFF);
 
-    this._getChainsCheck = function(y, x, targetCell, chain) {
+    // Loading stuff
+    // add selected cell marker sprite
+    this.marker = new PIXI.Sprite(PIXI.Texture.fromImage('images/selected.png'));
+    this.marker.visible = false;
+    this.marker.anchor.x = 0.5;
+    this.marker.anchor.y = 0.5;
+    this.stage.addChild(this.marker);
 
-        if (this.level.gridMap[y][x] !== 0) {
-
-            var cell = this.grid[y][x];
-            if (cell) {
-                if (cell.kind !== targetCell.kind) {
-                    return false;
-                }
-
-                chain.push(cell);
-                return true;
-            }
-        }
-
-        return false;
-    };
 };
 
 GAME.Game.prototype.constructor = GAME.Game;
@@ -190,13 +181,6 @@ GAME.Game.prototype.run = function() {
 
     requestAnimFrame(self.animate);
 
-    // add selected cell marker sprite
-    self.marker = new PIXI.Sprite(PIXI.Texture.fromImage('images/selected.png'));
-    self.marker.visible = false;
-    self.marker.anchor.x = 0.5;
-    self.marker.anchor.y = 0.5;
-    self.stage.addChild(self.marker);
-
     // create game field
     self.init();
 
@@ -255,17 +239,22 @@ GAME.Game.prototype.touchDown = function(e) {
 GAME.Game.prototype.setMarker = function(cell) {
 
     this.cellFirst = cell;
-    this.marker.visible = cell != null;
+
+    this.marker.visible = !!cell;
 
     if (this.marker.visible) {
-
         this.marker.position.x = cell.position.x;
         this.marker.position.y = cell.position.y;
-        this.marker.visible = true;
     }
 }
 
-GAME.Game.prototype.trySwap = function(cell1, cell2) {
+GAME.Game.prototype.swapValue = function(cell1, cell2, field) {
+    var tmp = cell1[field];
+    cell1[field] = cell2[field];
+    cell2[field] = tmp;
+};
+
+GAME.Game.prototype.trySwap = function(cell1, cell2, next) {
 
     var self = this;
 
@@ -285,29 +274,16 @@ GAME.Game.prototype.trySwap = function(cell1, cell2) {
 
             console.log('valid move, swap cells');
 
-            self.grid[cell1.gridX][cell1.gridY] = cell2;
-            self.grid[cell2.gridX][cell2.gridY] = cell1;
+            self.grid[cell1.gridY][cell1.gridX] = cell2;
+            self.grid[cell2.gridY][cell2.gridX] = cell1;
 
             // and switch coordinate values
-            var tmpX = cell1.gridX;
-            var tmpY = cell1.gridY;
-            cell1.gridX = cell2.gridX;
-            cell1.gridY = cell2.gridY;
-            cell2.gridX = tmpX;
-            cell2.gridY = tmpY;
+            self.swapValue(cell1, cell2, 'gridX');
+            self.swapValue(cell1, cell2, 'gridY');
 
-
-            for (var i = 0; i < chain1.cells.length; i++) {
-                console.log(chain1.cells[i].gridY + ' : ' + chain1.cells[i].gridY);
-            };
-
-            console.log('----------------');
-
-            for (var i = 0; i < chain2.cells.length; i++) {
-                console.log(chain2.cells[i].gridY + ' : ' + chain2.cells[i].gridY);
-            };
-
-
+            if (next) {
+                next();
+            }
             // EXTERMINATE!!!
             self.clearRows();
         }
