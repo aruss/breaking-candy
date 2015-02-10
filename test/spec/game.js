@@ -6,19 +6,20 @@ describe('GAME', function() {
 
     it('init field with random kinds', function() {
 
-        GAME.init();
+        var game = new GAME.Game();
 
-        assert.equal(GAME.gridMaxHeight, GAME.grid.length - 1);
+        game.init();
+        assert.equal(game.gridMaxHeight, game.grid.length - 1);
 
         for (var y = 0; y <= this.gridMaxHeight; y++) {
 
-            assert.equal(GAME.gridMaxWidth, GAME.grid[y].length - 1);
+            assert.equal(game.gridMaxWidth, game.grid[y].length - 1);
 
             for (var x = 0; x <= this.gridMaxWidth; x++) {
 
-                var cell = GAME.grid[y][x];
+                var cell = game.grid[y][x];
 
-                if (GAME.gridMap[y][x] == 0) {
+                if (game.leve.gridMap[y][x] == 0) {
 
                     should.not.exist(cell);
                 } else {
@@ -34,6 +35,8 @@ describe('GAME', function() {
 
     it('init field with given kinds', function() {
 
+        var game = new GAME.Game();
+
         //   0  1  2  3  4  5  6  7  8
         var kinds = [
             [0, 1, 1, 0, 0, 0, 1, 1, 0], // 0
@@ -47,19 +50,19 @@ describe('GAME', function() {
             [0, 1, 1, 0, 0, 0, 1, 1, 0], // 8
         ];
 
-        GAME.init(kinds);
+        game.init(kinds);
 
-        assert.equal(GAME.gridMaxHeight, GAME.grid.length - 1);
+        assert.equal(game.gridMaxHeight, game.grid.length - 1);
 
         for (var y = 0; y <= this.gridMaxHeight; y++) {
 
-            assert.equal(GAME.gridMaxWidth, GAME.grid[y].length - 1);
+            assert.equal(game.gridMaxWidth, game.grid[y].length - 1);
 
             for (var x = 0; x <= this.gridMaxWidth; x++) {
 
-                var cell = GAME.grid[y][x];
+                var cell = game.grid[y][x];
 
-                if (GAME.gridMap[y][x] == 0) {
+                if (game.level.gridMap[y][x] == 0) {
 
                     should.not.exist(cell);
                 } else {
@@ -101,8 +104,10 @@ describe('GAME', function() {
 
     it('getChains', function() {
 
+        var game = new GAME.Game();
+
         var assertChain = function(y, x, rows, cells, lbl) {
-            var r = GAME.getChains(y, x, GAME.grid[y][x]);
+            var r = game.getChains(y, x, game.grid[y][x]);
             assert.equal(r.cells.length, cells, lbl + ' cell length');
             assert.equal(r.rows, rows, lbl + ' row length');
         };
@@ -120,7 +125,7 @@ describe('GAME', function() {
             [0, 1, 3, 0, 0, 0, 1, 1, 0], // 8
         ];
 
-        GAME.init(kinds);
+        game.init(kinds);
 
         // horizontal
         assertChain(1, 0, 1, 3, 'h valid left to right');
@@ -161,6 +166,7 @@ describe('GAME', function() {
     it('Candy explode', function(done) {
 
         var candy = new GAME.Candy(0);
+
         // without callback
         candy.explode();
         candy.explode(function() {
